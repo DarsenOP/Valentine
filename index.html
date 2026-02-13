@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Valentine Quest</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        :root { --primary: #ff4d6d; --secondary: #ff8fa3; --bg: #fff0f3; }
+        body { font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow-x: hidden; }
+        .card { background: white; width: 90%; max-width: 420px; padding: 35px; border-radius: 30px; box-shadow: 0 15px 35px rgba(255, 77, 109, 0.25); text-align: center; position: relative; z-index: 10; border: 4px solid #fff; }
+        
+        #timer-box { background: #fff8f9; padding: 15px; border-radius: 20px; margin-bottom: 20px; border: 1px solid #ffe5e9; }
+        .timer-label { font-size: 0.75em; color: var(--primary); font-weight: bold; letter-spacing: 1px; margin-bottom: 5px; }
+        #time-display { font-size: 1.1em; color: #d63384; font-weight: 800; }
+
+        .progress-container { width: 100%; background: #eee; height: 8px; border-radius: 10px; margin-bottom: 25px; overflow: hidden; }
+        #progress-bar { width: 10%; height: 100%; background: var(--primary); transition: 0.5s ease; }
+
+        h2 { color: var(--primary); font-size: 1.4em; line-height: 1.4; margin-bottom: 20px; }
+        .btn-grid { display: grid; gap: 12px; margin-top: 20px; }
+        
+        button { background: white; border: 2px solid var(--primary); color: var(--primary); padding: 14px; border-radius: 50px; cursor: pointer; font-size: 16px; transition: 0.3s; font-weight: bold; outline: none; }
+        button:hover { background: var(--primary); color: white; transform: translateY(-2px); }
+        
+        #reason-list { display: none; text-align: left; max-height: 50vh; overflow-y: auto; padding-right: 10px; scroll-behavior: smooth; }
+        .reason-item { margin-bottom: 18px; padding: 12px; background: #fff8f9; border-radius: 12px; color: #444; line-height: 1.6; border-left: 4px solid var(--primary); animation: fadeIn 0.5s ease forwards; }
+        .zh { display: block; font-weight: bold; color: #d63384; margin-bottom: 4px; }
+        .en { display: block; font-size: 0.9em; color: #666; font-style: italic; }
+
+        .floating-heart { position: absolute; color: var(--primary); opacity: 0.4; pointer-events: none; animation: float 5s linear infinite; font-size: 20px; }
+        @keyframes float { to { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        #reason-list::-webkit-scrollbar { width: 5px; }
+        #reason-list::-webkit-scrollbar-thumb { background: var(--secondary); border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="timer-box">
+        <div class="timer-label">TIME SPENT LOVING YOU</div>
+        <div id="time-display">Calculating...</div>
+    </div>
+
+    <div class="progress-container"><div id="progress-bar"></div></div>
+    
+    <div id="content-section">
+        <h2 id="display-text">Loading...</h2>
+        <div class="btn-grid" id="options"></div>
+    </div>
+
+    <div id="reason-list">
+        <h2 style="font-size: 1.6em;text-align: center;">🌹 14 Reasons Why 🌹</h2>
+        <div id="reasons-container"></div>
+        <div style="text-align:center; margin-top:30px; padding:20px; border-top: 2px solid var(--bg);">
+            <p style="color: var(--primary); font-weight:bold; font-size: 1.2em;">Happy Valentine's Day!</p>
+            <p style="font-size: 0.9em; color: #888;">Distance is just a test to see how far love can travel.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const startDate = new Date(2025, 6, 20, 0, 0, 0);
+
+    function updateTimer() {
+        const now = new Date();
+        const diff = now - startDate;
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+        const m = Math.floor((diff / 1000 / 60) % 60);
+        const s = Math.floor((diff / 1000) % 60);
+        document.getElementById('time-display').innerHTML = `${d}d ${h}h ${m}m ${s}s`;
+    }
+    setInterval(updateTimer, 1000);
+    updateTimer();
+
+    const quizQuestions = [
+        { q: "What is my absolute favorite thing to do with you?", a: ["Exploring new places", "Lazy talks at night", "Just being near you"] },
+        { q: "How much was I thinking about you today?", a: ["Every minute", "Every second", "Non-stop"] },
+        { q: "If I could fly anywhere right now, where would I go?", a: ["To your city", "Right next to you", "Wherever you are"] },
+        { q: "What is your best feature (according to me)?", a: ["Your heart", "Your beautiful smile", "Everything about you"] },
+        { q: "Who is the luckiest guy in the world to have you?", a: ["Me, 100%", "Definitely me", "Me, forever"] }
+    ];
+
+    const reasons = [
+        {zh: "你的笑容是我在这个世界上最爱的风景。", en: "Your smile is my favorite view in the whole world."},
+        {zh: "因为你，每一个平凡的日子都变得闪闪发光。", en: "You turn even the most ordinary day into something special."},
+        {zh: "你倾听我的方式，让我感觉到真正被理解。", en: "You listen to me in a way that makes me feel truly seen."},
+        {zh: "你的笑声是我百听不厌的旋律。", en: "Your laugh is the sound I never get tired of hearing."},
+        {zh: "你让我每天都想成为更好的自己。", en: "You make me want to be the best version of myself."},
+        {zh: "你温柔照顾身边人的样子，让我的心都化了。", en: "The way you care about others makes my heart so soft."},
+        {zh: "你既是我的避风港，也是我最精彩的冒险。", en: "You are my safest place and my wildest adventure."},
+        {zh: "每次看到你的消息，我都会不由自主地微笑。", en: "Every time I see your message, I instantly feel happier."},
+        {zh: "和你在一起，即使沉默也感到无比安稳。", en: "You make even silence feel comfortable, like home."},
+        {zh: "甚至在我都不相信自己时，你依然相信我。", en: "You believe in me even when I don't fully believe in myself."},
+        {zh: "你由内而外散发的美，是你自己都没察觉的魅力。", en: "You are effortlessly beautiful in ways you don't even notice."},
+        {zh: "你让爱变得简单、纯粹且真实。", en: "You make love feel simple, kind, and so, so real."},
+        {zh: "和你在一起，我开始期待未来的每一个明天。", en: "With you, I actually look forward to the future."},
+        {zh: "无论发生什么，我的心总会绕个圈回到你身边。", en: "No matter what, my heart always finds its way back to you."}
+    ];
+
+    let currentStep = 0; // 0: Intro, 1: Accept Gift, 2: Final Ask, 3: Not so fast, 4: Quiz, 5: Reasons
+    let rejectionCount = 0;
+    let quizIndex = 0;
+
+    function render() {
+        const textEl = document.getElementById('display-text');
+        const optsEl = document.getElementById('options');
+        const prog = document.getElementById('progress-bar');
+        optsEl.innerHTML = '';
+
+        if (currentStep === 0) {
+            prog.style.width = "10%";
+            textEl.innerText = "I know delivery couldn't reach you today...\nBut my heart always does! ❤️";
+            addBtn("Open your little gift", () => { currentStep = 1; render(); });
+        } 
+        else if (currentStep === 1) {
+            prog.style.width = "25%";
+            let t = "Will you accept this little Valentine's gift from me?";
+            if (rejectionCount === 1) t = "Pleaseee??? Will you accept it now? 🥺";
+            if (rejectionCount >= 2) t = "Nope, 'No' is not an option anymore. 😤";
+            textEl.innerText = t;
+            addBtn("Yes, of course 💌", () => { currentStep = 2; render(); });
+            if (rejectionCount < 2) addBtn("No 😜", () => { rejectionCount++; render(); });
+        } 
+        else if (currentStep === 2) {
+            prog.style.width = "40%";
+            textEl.innerText = "So... will you be my Valentine today and forever?";
+            addBtn("Yes! ❤️", () => { currentStep = 3; render(); });
+        }
+        else if (currentStep === 3) {
+            prog.style.width = "50%";
+            textEl.innerText = "Not so fast girl... ✋\n\nYou have to prove you know me first!";
+            addBtn("I'm ready! Challenge accepted 😎", () => { currentStep = 4; render(); });
+        }
+        else if (currentStep === 4) {
+            prog.style.width = (50 + (quizIndex * 10)) + "%";
+            const q = quizQuestions[quizIndex];
+            textEl.innerText = `Question ${quizIndex + 1}: \n ${q.q}`;
+            q.a.forEach(answer => {
+                addBtn(answer, () => {
+                    quizIndex++;
+                    if (quizIndex < quizQuestions.length) render();
+                    else {
+                        confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
+                        showReasons();
+                    }
+                });
+            });
+        }
+    }
+
+    function addBtn(text, action) {
+        const btn = document.createElement('button');
+        btn.innerText = text;
+        btn.onclick = action;
+        document.getElementById('options').appendChild(btn);
+    }
+
+    function showReasons() {
+        document.getElementById('progress-bar').style.width = "100%";
+        document.getElementById('content-section').style.display = 'none';
+        document.getElementById('reason-list').style.display = 'block';
+        const container = document.getElementById('reasons-container');
+        reasons.forEach((r, i) => {
+            const item = document.createElement('div');
+            item.className = 'reason-item';
+            item.style.animationDelay = (i * 0.1) + 's';
+            item.innerHTML = `<span class="zh">${i+1}. ${r.zh}</span><span class="en">${r.en}</span>`;
+            container.appendChild(item);
+        });
+    }
+
+    setInterval(() => {
+        const h = document.createElement('div');
+        h.className = 'floating-heart';
+        h.innerHTML = ['❤️', '💖', '💝', '💕'][Math.floor(Math.random() * 4)];
+        h.style.left = Math.random() * 100 + 'vw';
+        h.style.top = '100vh';
+        h.style.animationDuration = (Math.random() * 3 + 3) + 's';
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 5000);
+    }, 400);
+
+    render();
+</script>
+</body>
+</html>
