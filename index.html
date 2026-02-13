@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Valentine Quest</title>
+    <title>My Valentine Quest For 谨怡</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         :root { --primary: #ff4d6d; --secondary: #ff8fa3; --bg: #fff0f3; }
@@ -28,6 +28,8 @@
         .zh { display: block; font-weight: bold; color: #d63384; margin-bottom: 4px; }
         .en { display: block; font-size: 0.9em; color: #666; font-style: italic; }
 
+        .signature { margin-top: 20px; font-size: 0.9em; color: var(--secondary); font-style: italic; }
+
         .floating-heart { position: absolute; color: var(--primary); opacity: 0.4; pointer-events: none; animation: float 5s linear infinite; font-size: 20px; }
         @keyframes float { to { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -49,13 +51,14 @@
     <div id="content-section">
         <h2 id="display-text">Loading...</h2>
         <div class="btn-grid" id="options"></div>
+        <div class="signature" id="initial-sig">For 谨怡 ❤️</div>
     </div>
 
     <div id="reason-list">
-        <h2 style="font-size: 1.6em;text-align: center;">🌹 14 Reasons Why 🌹</h2>
+        <h2 style="font-size: 1.6em;text-align: center;">🌹 14 Reasons I Love 谨怡 🌹</h2>
         <div id="reasons-container"></div>
         <div style="text-align:center; margin-top:30px; padding:20px; border-top: 2px solid var(--bg);">
-            <p style="color: var(--primary); font-weight:bold; font-size: 1.2em;">Happy Valentine's Day!</p>
+            <p style="color: var(--primary); font-weight:bold; font-size: 1.2em;">情人节快乐，谨怡！</p>
             <p style="font-size: 0.9em; color: #888;">Distance is just a test to see how far love can travel.</p>
         </div>
     </div>
@@ -101,7 +104,7 @@
         {zh: "无论发生什么，我的心总会绕个圈回到你身边。", en: "No matter what, my heart always finds its way back to you."}
     ];
 
-    let currentStep = 0; // 0: Intro, 1: Accept Gift, 2: Final Ask, 3: Not so fast, 4: Quiz, 5: Reasons
+    let currentStep = 0; 
     let rejectionCount = 0;
     let quizIndex = 0;
 
@@ -120,7 +123,7 @@
             prog.style.width = "25%";
             let t = "Will you accept this little Valentine's gift from me?";
             if (rejectionCount === 1) t = "Pleaseee??? Will you accept it now? 🥺";
-            if (rejectionCount >= 2) t = "Nope, 'No' is not an option anymore. 😤";
+            if (rejectionCount >= 2) t = "Nope, 'No' is not an option for you today. 😤";
             textEl.innerText = t;
             addBtn("Yes, of course 💌", () => { currentStep = 2; render(); });
             if (rejectionCount < 2) addBtn("No 😜", () => { rejectionCount++; render(); });
@@ -132,8 +135,8 @@
         }
         else if (currentStep === 3) {
             prog.style.width = "50%";
-            textEl.innerText = "Not so fast girl... ✋\n\nYou have to prove you know me first!";
-            addBtn("I'm ready! Challenge accepted 😎", () => { currentStep = 4; render(); });
+            textEl.innerText = "Not so fast... ✋\n\nYou have to prove you know me first!";
+            addBtn("Challenge accepted 😎", () => { currentStep = 4; render(); });
         }
         else if (currentStep === 4) {
             prog.style.width = (50 + (quizIndex * 10)) + "%";
